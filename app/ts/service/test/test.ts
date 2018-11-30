@@ -13,10 +13,23 @@ describe('Titulo Model', () => {
 
 describe('TesouroDiretoService', () => {
 
-    it('Selic deve ter valor de compra e venda como number', () => {
+    it('Selic deve ter valor de compra e venda como number', done => {
         const tesouroService = new TesouroDiretoService();
 
-        expect(tesouroService.getSelic().getBuyPrice()).to.be.an('number');
-        expect(tesouroService.getSelic().getSellPrice()).to.be.an('number');
+        tesouroService.laodTitles().then(() => {
+            console.log('oi');
+            
+    
+            // console.log(tesouroService.getSelic() == Titulo);
+            
+    
+            expect(tesouroService.getSelic().getBuyPrice()).to.be.an('number');
+            expect(tesouroService.getSelic().getSellPrice()).to.be.an('number');
+
+            done();
+
+        })
+        .catch(err => done(err));
+
     });
 });

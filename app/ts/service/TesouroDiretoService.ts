@@ -6,40 +6,31 @@ export class TesouroDiretoService {
     ipca: Titulo;
     prefix: Titulo;
 
-    constructor() {
+    loaded: boolean = false;
 
-        const crawler = new Crawler({
-            callback: (errors, res, done) => {
-                if (errors) {
-                    console.log(errors);
-                    done(errors);
+    laodTitles() {
+        return new Promise((resolve, reject) => {
+            const crawler = new Crawler({
+                callback: (errors, res) => {
+                    if (errors) {
+                        reject(errors);
+                    }
+                    const $ = res.$;
+    
+                    const trSelic = $(".tabelaPrecoseTaxas:not('.sanfonado') .camposTesouroDireto:contains('Tesouro Selic 2023')");
+                    const selicBuyValue = this.moneyToNumberParser(this.nationalToInternationalStringNumber(trSelic.children().last().text()));
+    
+                    const trSellSelic = $(".tabelaPrecoseTaxas.sanfonado .camposTesouroDireto:contains('Tesouro Selic 2023')");
+                    const selicSellValue = this.moneyToNumberParser(this.nationalToInternationalStringNumber(trSellSelic.children().last().text()));
+    
+                    this.selic = new Titulo(selicBuyValue, selicSellValue);
+    
+                    resolve();
                 }
+            });
 
-                const $ = res.$;
-
-                const trSelic = $(".tabelaPrecoseTaxas:not('.sanfonado') .camposTesouroDireto:contains('Tesouro Selic 2023')");
-                // const tdArray = trSelic.find('td');
-                
-                const selicBuyValue = parseFloat(trSelic.children().last().text().replace(/R\$/, '').replace(/\./, '').replace(/,/, '.'));
-                
-                console.log(selicBuyValue);
-                // const priceSelicTd = tdArray[tdArray.length - 1];
-
-
-                // camposTesouro.
-
-                // const tdSelic = 
-
-                // console.log(trSelic.children().length);
-                // console.log(priceSelicTd.text());
-
-
-                done();
-
-            }
+            crawler.queue('http://www.tesouro.fazenda.gov.br/tesouro-direto-precos-e-taxas-dos-titulos');
         });
-
-        crawler.queue('http://www.tesouro.fazenda.gov.br/tesouro-direto-precos-e-taxas-dos-titulos');
     }
 
     getSelic() {
@@ -52,5 +43,13 @@ export class TesouroDiretoService {
 
     getPrefix() {
         return this.prefix
+    }
+
+    nationalToInternationalStringNumber(num: string) {
+        return num.replace(/\./, '').replace(/,/, '.');
+    }
+
+    moneyToNumberParser(price: string) {
+        return parseFloat(price.replace(/R\$/, ''));
     }
 }
