@@ -1,4 +1,4 @@
-export class Titulo {
+export default class Titulo {
     buy: number;
     sell: number;
 

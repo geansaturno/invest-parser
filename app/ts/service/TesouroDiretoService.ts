@@ -1,4 +1,4 @@
-import { Titulo } from './model/Titulo';
+import Titulo from './model/Titulo';
 const Crawler = require('crawler')
 
 export class TesouroDiretoService {
@@ -8,29 +8,30 @@ export class TesouroDiretoService {
 
     loaded: boolean = false;
 
-    laodTitles() {
-        return new Promise((resolve, reject) => {
-            const crawler = new Crawler({
-                callback: (errors, res) => {
-                    if (errors) {
-                        reject(errors);
-                    }
-                    const $ = res.$;
-    
-                    const trSelic = $(".tabelaPrecoseTaxas:not('.sanfonado') .camposTesouroDireto:contains('Tesouro Selic 2023')");
-                    const selicBuyValue = this.moneyToNumberParser(this.nationalToInternationalStringNumber(trSelic.children().last().text()));
-    
-                    const trSellSelic = $(".tabelaPrecoseTaxas.sanfonado .camposTesouroDireto:contains('Tesouro Selic 2023')");
-                    const selicSellValue = this.moneyToNumberParser(this.nationalToInternationalStringNumber(trSellSelic.children().last().text()));
-    
-                    this.selic = new Titulo(selicBuyValue, selicSellValue);
-    
-                    resolve();
+    async laodTitles() {
+        const crawler = new Crawler({
+            callback: (errors: string, res) => {
+                if (errors) {
+                    throw new Error(errors);
                 }
-            });
+                const $ = res.$;
 
-            crawler.queue('http://www.tesouro.fazenda.gov.br/tesouro-direto-precos-e-taxas-dos-titulos');
+                const trSelic = $(".tabelaPrecoseTaxas:not('.sanfonado') .camposTesouroDireto:contains('Tesouro Selic 2023')");
+                const selicBuyValue = this.moneyToNumberParser(this.nationalToInternationalStringNumber(trSelic.children().last().text()));
+
+                const trSellSelic = $(".tabelaPrecoseTaxas.sanfonado .camposTesouroDireto:contains('Tesouro Selic 2023')");
+                const selicSellValue = this.moneyToNumberParser(this.nationalToInternationalStringNumber(trSellSelic.children().last().text()));
+
+                console.log(selicBuyValue, selicSellValue);
+                
+
+                this.selic = new Titulo(selicBuyValue, selicSellValue);
+
+                return true;
+            }
         });
+
+        crawler.queue('http://www.tesouro.fazenda.gov.br/tesouro-direto-precos-e-taxas-dos-titulos');
     }
 
     getSelic() {

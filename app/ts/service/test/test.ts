@@ -1,4 +1,4 @@
-import {Titulo} from '../model/Titulo';
+import Titulo from '../model/Titulo';
 import {TesouroDiretoService} from '../TesouroDiretoService';
 import {expect} from 'chai'
 
